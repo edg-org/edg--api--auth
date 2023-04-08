@@ -49,6 +49,23 @@ class TokenService:
         new_token.refresh_token = refresh_token
         return new_token
 
+    def new_forgot_password_token(self, email: str) -> Token | None:
+        user = self.userRepository.get_by_email(User(email=email))
+        if user is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Inexistent user")
+
+        payload = {"email": user.email}
+        refresh_token = self.refresh_tokenizer.create_access_token(payload)
+        new_token = self.tokenRepository.create(
+            Token(bearer_token=Hasher.hash_sha256(refresh_token),
+                  refresh_token=Hasher.hash_sha256(refresh_token),
+                  user_id=user.id))
+        new_token.bearer_token = refresh_token
+        new_token.refresh_token = refresh_token
+        return new_token
+
     def renew_token(self, bearer_token: str, token_body: TokenRefresh) -> Token:
         token = self.tokenRepository.get_by_bearer(Token(bearer_token=Hasher.hash_sha256(bearer_token)))
         if token is None:
