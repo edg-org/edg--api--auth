@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, status, HTTPException
+from pydantic import EmailStr
 
 from api.schemas.pydantic.TokenSchema import TokenPublic, TokenNew, TokenRefresh, TokenPayload
 from api.services.TokenService import TokenService
@@ -14,8 +15,7 @@ TokenRouter = APIRouter(
                   response_model=TokenPublic,
                   status_code=status.HTTP_201_CREATED,
                   summary="Create a new token",
-                  description="Create a new token for a user with email and password"
-)
+                  description="Create a new token for a user with email and password")
 def new_token(
         user_body: TokenNew,
         tokenService: TokenService = Depends(),
@@ -78,3 +78,19 @@ def revoke_token(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="token not found")
+
+
+@TokenRouter.get("/forgot_password",
+                 response_model=dict,
+                 summary="Create a new token for forgot password",
+                 description="Create a new token for forgot password with email")
+def get_forgot_password_token(
+        email: EmailStr,
+        tokenService: TokenService = Depends(),
+):
+    try:
+        return {"token": tokenService.new_forgot_password_token(email).bearer_token}
+    except AttributeError:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="user not found")
