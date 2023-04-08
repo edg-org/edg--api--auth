@@ -7,8 +7,6 @@ from api.routers.v1.OauthScopeRouter import OauthScopeRouter
 from api.routers.v1.TokenRouter import TokenRouter
 from api.routers.v1.UserRouter import UserRouter
 
-# Application Environment Configuration
-
 # Core Application Instance
 app = FastAPI(
     title=env.APP_NAME,
