@@ -40,6 +40,7 @@
       <option name="ignoredIdentifiers">
         <list>
           <option value="list.__await__" />
+          <option value="sqlalchemy.orm.add.assert_called_once_with" />
         </list>
       </option>
     </inspection_tool>
