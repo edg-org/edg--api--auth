@@ -20,6 +20,11 @@ class EnvironmentSettings(BaseSettings):
     DATABASE_PORT: int
     DATABASE_USERNAME: str
     DEBUG_MODE: bool
+    JWT_SECRET_BEARER: str
+    JWT_SECRET_REFRESH: str
+    JWT_ALGORITHM: str
+    JWT_EXPIRATION_DAYS_BEARER: int
+    JWT_EXPIRATION_DAYS_REFRESH: int
 
     class Config:
         env_file = get_env_filename()
@@ -29,3 +34,6 @@ class EnvironmentSettings(BaseSettings):
 @lru_cache
 def get_environment_variables():
     return EnvironmentSettings()
+
+
+env = get_environment_variables()
