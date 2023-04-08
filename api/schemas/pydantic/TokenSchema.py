@@ -32,14 +32,15 @@ class TokenPayload(BaseModel):
     Used for decoding a token
     """
     email: EmailStr
+    exp: datetime
     scopes: list[str]
 
 
-class TokenRefresh(TokenBase):
+class TokenRefresh(BaseModel):
     """
     Email, and password are required for registering a new user
     """
-    pass
+    refresh_token: str
 
 
 class TokenInDB(IDModelMixin, DateTimeModelMixin, TokenBase):

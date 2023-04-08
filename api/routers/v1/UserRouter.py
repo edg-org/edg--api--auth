@@ -7,6 +7,7 @@ from api.schemas.pydantic.UserSchema import (
     UserPublic, UserCreate, UserUpdatePassword, UserScopes, UserUpdateVerifiedEmail
 )
 from api.services.UserService import UserService
+from api.utils.JWTBearer import JWTBearer
 
 UserRouter = APIRouter(
     prefix="/v1/users", tags=["user"]
@@ -16,7 +17,8 @@ UserRouter = APIRouter(
 @UserRouter.get("/",
                 response_model=List[UserPublic],
                 summary="Get all existing users",
-                description="Get all users that are not deleted")
+                description="Get all users that are not deleted",
+                dependencies=[Depends(JWTBearer())])
 def index(
         pageSize: int | None = 100,
         startIndex: int | None = 0,
@@ -43,7 +45,8 @@ def create(user_body: UserCreate, userService: UserService = Depends()):
 @UserRouter.get("/all",
                 response_model=List[UserPublic],
                 summary="Get all users",
-                description="Get all users including deleted ones")
+                description="Get all users including deleted ones",
+                dependencies=[Depends(JWTBearer())])
 def index(
         pageSize: int | None = 100,
         startIndex: int | None = 0,
@@ -56,7 +59,8 @@ def index(
 @UserRouter.get("/{id}",
                 response_model=UserPublic,
                 summary="Get a user",
-                description="Get a user by id")
+                description="Get a user by id",
+                dependencies=[Depends(JWTBearer())])
 async def show(id: int, userService: UserService = Depends()):
     try:
         return userService.get_user(id).normalize()
@@ -69,7 +73,8 @@ async def show(id: int, userService: UserService = Depends()):
 @UserRouter.delete("/{id}",
                    response_model=UserPublic,
                    summary="Delete a user",
-                   description="Delete a user by id")
+                   description="Delete a user by id",
+                   dependencies=[Depends(JWTBearer())])
 async def delete(id: int, userService: UserService = Depends()):
     try:
         return userService.delete_user(id).normalize()
@@ -82,7 +87,8 @@ async def delete(id: int, userService: UserService = Depends()):
 @UserRouter.put("/{id}/password",
                 response_model=UserPublic,
                 summary="Update a user's password",
-                description="Update a user's password by id")
+                description="Update a user's password by id",
+                dependencies=[Depends(JWTBearer())])
 async def update_password(id: int, user_body: UserUpdatePassword, userService: UserService = Depends()):
     try:
         return userService.update_password(id, user_body).normalize()
@@ -95,7 +101,8 @@ async def update_password(id: int, user_body: UserUpdatePassword, userService: U
 @UserRouter.get("/{id}/scopes",
                 response_model=List[OauthScopePublic],
                 summary="Get a user's scopes",
-                description="Get a user's scopes by id (scopes are used for authorization)")
+                description="Get a user's scopes by id (scopes are used for authorization)",
+                dependencies=[Depends(JWTBearer())])
 async def get_user_scopes(id: int, userService: UserService = Depends()):
     try:
         scopes = userService.get_user_scopes(id)
@@ -109,7 +116,8 @@ async def get_user_scopes(id: int, userService: UserService = Depends()):
 @UserRouter.put("/{id}/scopes",
                 response_model=List[OauthScopePublic],
                 summary="Update a user's scopes",
-                description="Update a user's scopes by id (scopes are used for authorization)")
+                description="Update a user's scopes by id (scopes are used for authorization)",
+                dependencies=[Depends(JWTBearer())])
 async def update_scopes(id: int, user_body: UserScopes, userService: UserService = Depends()):
     try:
         scopes = userService.update_scopes(id, user_body)
@@ -123,7 +131,8 @@ async def update_scopes(id: int, user_body: UserScopes, userService: UserService
 @UserRouter.put("/{id}/email_verified",
                 response_model=UserPublic,
                 summary="Valide a user's email",
-                description="Valide a user's email by id and set it to verified")
+                description="Valide a user's email by id and set it to verified",
+                dependencies=[Depends(JWTBearer())])
 async def update_email_verified(id: int, user_body: UserUpdateVerifiedEmail, userService: UserService = Depends()):
     try:
         user_body.email_verified = True

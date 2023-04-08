@@ -26,8 +26,8 @@ class UserService:
         self.scopeRepository = scopeRepository
 
     def create_user(self, user_body: UserCreate) -> User:
-        user_body.password, user_body.salt = Hasher.hash_password(user_body.password)
-        return self.userRepository.create(User(**user_body.dict()))
+        user_body.password, salt = Hasher.hash_password(user_body.password)
+        return self.userRepository.create(User(email=user_body.email, password=user_body.password, salt=salt))
 
     def get_user(self, id: int) -> User | None:
         return self.userRepository.get(User(id=id))
@@ -45,8 +45,8 @@ class UserService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="user does not exist")
 
-        user_body.password, user_body.salt = Hasher.hash_password(user_body.password)
-        return self.userRepository.update(id, User(**user_body.dict()))
+        user_body.password, salt = Hasher.hash_password(user_body.password)
+        return self.userRepository.update(id, User(password=user_body.password, salt=salt))
 
     def get_user_scopes(self, id: int) -> List[OauthScope]:
         user = self.userRepository.get(User(id=id))

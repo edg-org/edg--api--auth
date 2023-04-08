@@ -18,7 +18,6 @@ class UserCreate(BaseModel):
     """
     email: EmailStr
     password: constr(min_length=8, max_length=100)
-    salt: str | None = None
 
 
 class UserUpdateVerifiedEmail(BaseModel):
@@ -33,7 +32,6 @@ class UserUpdatePassword(BaseModel):
     Users can change their password
     """
     password: constr(min_length=8, max_length=100)
-    salt: str | None = None
 
 
 class UserScopes(BaseModel):

@@ -25,7 +25,7 @@ class Tokenizer:
         :return: the access token
         """
         to_encode = data.copy()
-        expire = datetime.utcnow() + timedelta(days=self.access_token_expire_days)
+        expire = datetime.now() + timedelta(days=self.access_token_expire_days)
         to_encode.update({"exp": expire})
         encoded_jwt = jwt.encode(to_encode, self.secret_key, algorithm=self.algorithm)
         return encoded_jwt
@@ -38,9 +38,10 @@ class Tokenizer:
         """
         try:
             payload = jwt.decode(token, self.secret_key, algorithms=[self.algorithm])
-            return payload
+            return payload if "exp" in payload and datetime.fromtimestamp(payload["exp"]) >= datetime.now() else None
         except JWTError:
+            return {}
+        except TypeError:
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Could not validate credentials",
-            )
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f'An error occurred while verifying token {payload["exp"]}')

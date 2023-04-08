@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, status, HTTPException
 
 from api.schemas.pydantic.OauthScopeSchema import OauthScopePublic, OauthScopeCreate, OauthScopeUpdate
 from api.services.OauthScopeService import OauthScopeService
+from api.utils.JWTBearer import JWTBearer
 
 OauthScopeRouter = APIRouter(
     prefix="/v1/scopes", tags=["scope"]
@@ -13,7 +14,8 @@ OauthScopeRouter = APIRouter(
 @OauthScopeRouter.get("/",
                       response_model=List[OauthScopePublic],
                       summary="Get all existing scopes",
-                      description="Get all scopes that are not deleted")
+                      description="Get all scopes that are not deleted",
+                      dependencies=[Depends(JWTBearer())])
 def index(
         pageSize: int | None = 100,
         startIndex: int | None = 0,
@@ -27,7 +29,8 @@ def index(
                        response_model=OauthScopePublic,
                        status_code=status.HTTP_201_CREATED,
                        summary="Create a new scope",
-                       description="Create a new scope with a name and description")
+                       description="Create a new scope with a name and description",
+                       dependencies=[Depends(JWTBearer())])
 def create(scope_body: OauthScopeCreate, oauthScopeService: OauthScopeService = Depends()):
     try:
         oauth_scope = oauthScopeService.create_scope(scope_body)
@@ -41,7 +44,8 @@ def create(scope_body: OauthScopeCreate, oauthScopeService: OauthScopeService = 
 @OauthScopeRouter.get("/all",
                       response_model=List[OauthScopePublic],
                       summary="Get all scopes",
-                      description="Get all scopes including deleted ones")
+                      description="Get all scopes including deleted ones",
+                      dependencies=[Depends(JWTBearer())])
 def index(
         pageSize: int | None = 100,
         startIndex: int | None = 0,
@@ -54,7 +58,8 @@ def index(
 @OauthScopeRouter.get("/{id}",
                       response_model=OauthScopePublic | None,
                       summary="Get a scope",
-                      description="Get a scope by id")
+                      description="Get a scope by id",
+                      dependencies=[Depends(JWTBearer())])
 def show(id: int, oauthScopeService: OauthScopeService = Depends()):
     try:
         oauth_scope = oauthScopeService.get_scope(id)
@@ -68,7 +73,8 @@ def show(id: int, oauthScopeService: OauthScopeService = Depends()):
 @OauthScopeRouter.put("/{id}",
                       response_model=OauthScopePublic,
                       summary="Update a scope",
-                      description="Update a scope's description by id")
+                      description="Update a scope's description by id",
+                      dependencies=[Depends(JWTBearer())])
 def update(id: int, OauthScope_body: OauthScopeUpdate, oauthScopeService: OauthScopeService = Depends()):
     try:
         oauth_scope = oauthScopeService.update_scope(id, OauthScope_body)
@@ -82,7 +88,8 @@ def update(id: int, OauthScope_body: OauthScopeUpdate, oauthScopeService: OauthS
 @OauthScopeRouter.delete("/{id}",
                          response_model=OauthScopePublic,
                          summary="Delete a scope",
-                         description="Delete a scope by id")
+                         description="Delete a scope by id",
+                         dependencies=[Depends(JWTBearer())])
 def delete(id: int, oauthScopeService: OauthScopeService = Depends()):
     try:
         oauth_scope = oauthScopeService.delete_scope(id)

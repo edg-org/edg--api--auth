@@ -2,6 +2,8 @@ from fastapi import APIRouter, Depends, status, HTTPException
 
 from api.schemas.pydantic.TokenSchema import TokenPublic, TokenNew, TokenRefresh, TokenPayload
 from api.services.TokenService import TokenService
+from api.utils.JWTBearer import JWTBearer
+from fastapi.security import HTTPBearer
 
 TokenRouter = APIRouter(
     prefix="/v1/token", tags=["token"]
@@ -24,38 +26,33 @@ def new_token(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="user not found")
-    except Exception:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"An error occurred while creating token")
 
 
 @TokenRouter.post("/renew",
                   response_model=TokenPublic,
                   summary="Renew a token",
-                  description="Renew a token for a user with refresh token")
+                  description="Renew a token for a user with refresh token",
+                  dependencies=[Depends(HTTPBearer())])
 def renew_token(
         token_body: TokenRefresh,
         tokenService: TokenService = Depends(),
+        bearer_token=Depends(HTTPBearer()),
 ):
     try:
-        return tokenService.renew_token(token_body).normalize()
+        return tokenService.renew_token(bearer_token.credentials, token_body).normalize()
     except AttributeError:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="token not found")
-    except Exception:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"An error occurred while creating token")
+            detail=f"token not found for bearer token {bearer_token.credentials}")
 
 
 @TokenRouter.post("/introspect",
                   response_model=TokenPayload,
                   summary="Verify a token",
-                  description="Verify a token and return the payload containing user's email and scopes if valid")
+                  description="Verify a token and return the payload containing user's email and scopes if valid",
+                  dependencies=[Depends(JWTBearer())])
 def introspect_token(
-        bearer_token: str,
+        bearer_token: str = Depends(JWTBearer()),
         tokenService: TokenService = Depends(),
 ):
     try:
@@ -64,17 +61,15 @@ def introspect_token(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="token not found")
-    except Exception:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"An error occurred while checking token")
 
 
-@TokenRouter.post("/revoke", response_model=TokenPublic,
+@TokenRouter.post("/revoke",
+                  response_model=TokenPublic,
                   summary="Revoke a token",
-                  description="Revoke a token and return the deleted user")
+                  description="Revoke a token and return the deleted user",
+                  dependencies=[Depends(JWTBearer())])
 def revoke_token(
-        bearer_token: str,
+        bearer_token: str = Depends(JWTBearer()),
         tokenService: TokenService = Depends(),
 ):
     try:
@@ -83,7 +78,3 @@ def revoke_token(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="token not found")
-    except Exception:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"An error occurred while checking token")

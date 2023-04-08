@@ -49,12 +49,12 @@ class TokenService:
         new_token.refresh_token = refresh_token
         return new_token
 
-    def renew_token(self, token_body: TokenRefresh) -> Token:
-        token = self.tokenRepository.get_by_bearer(Token(bearer_token=Hasher.hash_sha256(token_body.bearer_token)))
+    def renew_token(self, bearer_token: str, token_body: TokenRefresh) -> Token:
+        token = self.tokenRepository.get_by_bearer(Token(bearer_token=Hasher.hash_sha256(bearer_token)))
         if token is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Inexistent bearer token")
+                detail=f"Inexistent bearer token {token_body.bearer_token}")
 
         if (token.refresh_token != Hasher.hash_sha256(token_body.refresh_token) or
                 not self.refresh_tokenizer.verify_token(token_body.refresh_token)):
