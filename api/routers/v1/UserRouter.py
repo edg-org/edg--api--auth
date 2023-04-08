@@ -56,6 +56,21 @@ def index(
     return [user.normalize() for user in users]
 
 
+@UserRouter.put("/password",
+                response_model=UserPublic,
+                summary="Update a user's password",
+                description="Update a user's password")
+async def update_password(
+        user_body: UserUpdatePassword,
+        userService: UserService = Depends()):
+    # try:
+    return userService.update_password(user_body).normalize()
+    # except AttributeError:
+    #     raise HTTPException(
+    #         status_code=status.HTTP_404_NOT_FOUND,
+    #         detail="user not found")
+
+
 @UserRouter.get("/{id}",
                 response_model=UserPublic,
                 summary="Get a user",
@@ -78,20 +93,6 @@ async def show(id: int, userService: UserService = Depends()):
 async def delete(id: int, userService: UserService = Depends()):
     try:
         return userService.delete_user(id).normalize()
-    except AttributeError:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="user not found")
-
-
-@UserRouter.put("/{id}/password",
-                response_model=UserPublic,
-                summary="Update a user's password",
-                description="Update a user's password by id",
-                dependencies=[Depends(JWTBearer())])
-async def update_password(id: int, user_body: UserUpdatePassword, userService: UserService = Depends()):
-    try:
-        return userService.update_password(id, user_body).normalize()
     except AttributeError:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

@@ -16,6 +16,7 @@ class TokenService:
     userRepository: UserRepository
     bearer_tokenizer: Tokenizer
     refresh_tokenizer: Tokenizer
+    forgot_password_tokenizer: Tokenizer
 
     def __init__(
             self, tokenRepository: TokenRepository = Depends(),
@@ -25,6 +26,8 @@ class TokenService:
         self.userRepository = userRepository
         self.bearer_tokenizer = Tokenizer(env.JWT_SECRET_BEARER, env.JWT_ALGORITHM, env.JWT_EXPIRATION_DAYS_BEARER)
         self.refresh_tokenizer = Tokenizer(env.JWT_SECRET_REFRESH, env.JWT_ALGORITHM, env.JWT_EXPIRATION_DAYS_REFRESH)
+        self.forgot_password_tokenizer = Tokenizer(env.JWT_SECRET_FORGOT_PASSWORD, env.JWT_ALGORITHM,
+                                                   env.JWT_EXPIRATION_DAYS_BEARER)
 
     def new_token(self, user_body: TokenNew) -> Token | None:
         user = self.userRepository.get_by_email(User(email=user_body.email))
@@ -57,13 +60,13 @@ class TokenService:
                 detail="Inexistent user")
 
         payload = {"email": user.email}
-        refresh_token = self.refresh_tokenizer.create_access_token(payload)
+        bearer_token = self.forgot_password_tokenizer.create_access_token(payload)
         new_token = self.tokenRepository.create(
-            Token(bearer_token=Hasher.hash_sha256(refresh_token),
-                  refresh_token=Hasher.hash_sha256(refresh_token),
+            Token(bearer_token=Hasher.hash_sha256(bearer_token),
+                  refresh_token=Hasher.hash_sha256(bearer_token),
                   user_id=user.id))
-        new_token.bearer_token = refresh_token
-        new_token.refresh_token = refresh_token
+        new_token.bearer_token = bearer_token
+        new_token.refresh_token = bearer_token
         return new_token
 
     def renew_token(self, bearer_token: str, token_body: TokenRefresh) -> Token:
@@ -71,10 +74,10 @@ class TokenService:
         if token is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Inexistent bearer token {token_body.bearer_token}")
+                detail=f"Inexistent bearer token")
 
         if (token.refresh_token != Hasher.hash_sha256(token_body.refresh_token) or
-                not self.refresh_tokenizer.verify_token(token_body.refresh_token)):
+                self.refresh_tokenizer.verify_token(token_body.refresh_token) is None):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Invalid refresh token")
