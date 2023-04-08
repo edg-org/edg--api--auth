@@ -1,6 +1,6 @@
 # EDG Microservices API Template
 
-## Description
+## Description 
 
 _Example Application Interface using FastAPI framework in Python 3_
 

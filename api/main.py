@@ -1,13 +1,11 @@
 from fastapi import FastAPI
 
-from api.configs.Environment import get_environment_variables
+from api.configs.Environment import env
 from api.metadata.Tags import Tags
 from api.models.BaseModel import init
-from api.routers.v1.AuthorRouter import AuthorRouter
-from api.routers.v1.BookRouter import BookRouter
-
-# Application Environment Configuration
-env = get_environment_variables()
+from api.routers.v1.OauthScopeRouter import OauthScopeRouter
+from api.routers.v1.TokenRouter import TokenRouter
+from api.routers.v1.UserRouter import UserRouter
 
 # Core Application Instance
 app = FastAPI(
@@ -17,8 +15,9 @@ app = FastAPI(
 )
 
 # Add Routers
-app.include_router(AuthorRouter)
-app.include_router(BookRouter)
+app.include_router(OauthScopeRouter)
+app.include_router(TokenRouter)
+app.include_router(UserRouter)
 
 # Initialise Data Model Attributes
 init()
