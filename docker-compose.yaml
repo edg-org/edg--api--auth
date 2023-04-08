@@ -11,7 +11,7 @@ services:
     ports:
       - "8080:80"
     env_file:
-      - api/.env
+      - .env
     restart: on-failure
     depends_on:
       - db
