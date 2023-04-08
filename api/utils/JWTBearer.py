@@ -24,7 +24,7 @@ class JWTBearer(HTTPBearer):
                 raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                                     detail="Invalid authentication scheme.")
 
-            if  not self.verify_jwt(credentials.credentials):
+            if not self.verify_jwt(credentials.credentials):
                 raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                                     detail="Invalid token or expired token.aaaa")
             return credentials.credentials
@@ -34,9 +34,10 @@ class JWTBearer(HTTPBearer):
 
     def verify_jwt(self, jwt_token: str) -> bool:
         try:
-            if self.tokenRepository.get_by_bearer(Token(bearer_token=Hasher.hash_sha256(jwt_token))) is None:
-                return False
-            
+            # if self.tokenRepository.get_by_bearer(Token(bearer_token=Hasher.hash_sha256(jwt_token))) is None:
+            #     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+            #                         detail="Invalid authorization code.")
+
             payload = self.bearer_tokenizer.verify_token(jwt_token)
             return payload is not None
         except Exception:
