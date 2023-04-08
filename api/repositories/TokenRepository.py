@@ -5,7 +5,6 @@ from api.configs.Database import (
     get_db_connection,
 )
 from api.models.TokenModel import Token
-from api.utils.Hasher import Hasher
 
 
 class TokenRepository:

@@ -19,9 +19,11 @@ class EnvironmentSettings(BaseSettings):
     DEBUG_MODE: bool = bool(os.getenv("DEBUG_MODE"))
     JWT_SECRET_BEARER: str = os.getenv("JWT_SECRET_BEARER")
     JWT_SECRET_REFRESH: str = os.getenv("JWT_SECRET_REFRESH")
+    JWT_SECRET_FORGOT_PASSWORD: str = os.getenv("JWT_SECRET_FORGOT_PASSWORD")
     JWT_ALGORITHM: str = os.getenv("JWT_ALGORITHM")
     JWT_EXPIRATION_DAYS_BEARER: int = int(os.getenv("JWT_EXPIRATION_DAYS_BEARER"))
     JWT_EXPIRATION_DAYS_REFRESH: int = int(os.getenv("JWT_EXPIRATION_DAYS_REFRESH"))
+    JWT_EXPIRATION_MINUTES_FORGOT_PASSWORD: int = int(os.getenv("JWT_EXPIRATION_MINUTES_FORGOT_PASSWORD"))
 
     class Config:
         env_file = ".env.dev"

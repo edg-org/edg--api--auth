@@ -32,6 +32,7 @@ class UserUpdatePassword(BaseModel):
     Users can change their password
     """
     password: constr(min_length=8, max_length=100)
+    token: str
 
 
 class UserScopes(BaseModel):
