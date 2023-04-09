@@ -20,8 +20,9 @@ def index(
         pageSize: int | None = 100,
         startIndex: int | None = 0,
         oauthScopeService: OauthScopeService = Depends(),
+        token: str = Depends(JWTBearer())
 ):
-    oauth_scopes = oauthScopeService.get_scopes(pageSize, startIndex)
+    oauth_scopes = oauthScopeService.get_scopes(pageSize, startIndex, token)
     return [oauth_scope.normalize() for oauth_scope in oauth_scopes]
 
 
@@ -31,9 +32,11 @@ def index(
                        summary="Create a new scope",
                        description="Create a new scope with a name and description",
                        dependencies=[Depends(JWTBearer())])
-def create(scope_body: OauthScopeCreate, oauthScopeService: OauthScopeService = Depends()):
+def create(scope_body: OauthScopeCreate,
+           oauthScopeService: OauthScopeService = Depends(),
+           token: str = Depends(JWTBearer())):
     try:
-        oauth_scope = oauthScopeService.create_scope(scope_body)
+        oauth_scope = oauthScopeService.create_scope(scope_body, token)
         return oauth_scope.normalize()
     except AttributeError:
         raise HTTPException(
@@ -50,8 +53,9 @@ def index(
         pageSize: int | None = 100,
         startIndex: int | None = 0,
         oauthScopeService: OauthScopeService = Depends(),
+        token: str = Depends(JWTBearer())
 ):
-    oauth_scopes = oauthScopeService.get_scopes(pageSize, startIndex, deleted=True)
+    oauth_scopes = oauthScopeService.get_scopes(pageSize, startIndex, token, deleted=True)
     return [oauth_scope.normalize() for oauth_scope in oauth_scopes]
 
 
@@ -60,9 +64,11 @@ def index(
                       summary="Get a scope",
                       description="Get a scope by id",
                       dependencies=[Depends(JWTBearer())])
-def show(id: int, oauthScopeService: OauthScopeService = Depends()):
+def show(id: int,
+         oauthScopeService: OauthScopeService = Depends(),
+         token: str = Depends(JWTBearer())):
     try:
-        oauth_scope = oauthScopeService.get_scope(id)
+        oauth_scope = oauthScopeService.get_scope(id, token)
         return oauth_scope.normalize()
     except AttributeError:
         raise HTTPException(
@@ -75,9 +81,12 @@ def show(id: int, oauthScopeService: OauthScopeService = Depends()):
                       summary="Update a scope",
                       description="Update a scope's description by id",
                       dependencies=[Depends(JWTBearer())])
-def update(id: int, OauthScope_body: OauthScopeUpdate, oauthScopeService: OauthScopeService = Depends()):
+def update(id: int,
+           OauthScope_body: OauthScopeUpdate,
+           oauthScopeService: OauthScopeService = Depends(),
+           token: str = Depends(JWTBearer())):
     try:
-        oauth_scope = oauthScopeService.update_scope(id, OauthScope_body)
+        oauth_scope = oauthScopeService.update_scope(id, OauthScope_body, token)
         return oauth_scope.normalize()
     except AttributeError:
         raise HTTPException(
@@ -90,9 +99,11 @@ def update(id: int, OauthScope_body: OauthScopeUpdate, oauthScopeService: OauthS
                          summary="Delete a scope",
                          description="Delete a scope by id",
                          dependencies=[Depends(JWTBearer())])
-def delete(id: int, oauthScopeService: OauthScopeService = Depends()):
+def delete(id: int,
+           oauthScopeService: OauthScopeService = Depends(),
+           token: str = Depends(JWTBearer())):
     try:
-        oauth_scope = oauthScopeService.delete_scope(id)
+        oauth_scope = oauthScopeService.delete_scope(id, token)
         return oauth_scope.normalize()
     except AttributeError:
         raise HTTPException(

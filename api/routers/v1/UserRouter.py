@@ -23,8 +23,9 @@ def index(
         pageSize: int | None = 100,
         startIndex: int | None = 0,
         userService: UserService = Depends(),
+        token: str = Depends(JWTBearer())
 ):
-    users = userService.get_users(pageSize, startIndex)
+    users = userService.get_users(pageSize, startIndex, token)
     return [user.normalize() for user in users]
 
 
@@ -51,8 +52,9 @@ def index(
         pageSize: int | None = 100,
         startIndex: int | None = 0,
         userService: UserService = Depends(),
+        token: str = Depends(JWTBearer())
 ):
-    users = userService.get_users(pageSize, startIndex, deleted=True)
+    users = userService.get_users(pageSize, startIndex, token, deleted=True)
     return [user.normalize() for user in users]
 
 
@@ -63,12 +65,12 @@ def index(
 async def update_password(
         user_body: UserUpdatePassword,
         userService: UserService = Depends()):
-    # try:
-    return userService.update_password(user_body).normalize()
-    # except AttributeError:
-    #     raise HTTPException(
-    #         status_code=status.HTTP_404_NOT_FOUND,
-    #         detail="user not found")
+    try:
+        return userService.update_password(user_body).normalize()
+    except AttributeError:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="user not found")
 
 
 @UserRouter.get("/{id}",
@@ -76,9 +78,11 @@ async def update_password(
                 summary="Get a user",
                 description="Get a user by id",
                 dependencies=[Depends(JWTBearer())])
-async def show(id: int, userService: UserService = Depends()):
+async def show(id: int,
+               userService: UserService = Depends(),
+               token: str = Depends(JWTBearer())):
     try:
-        return userService.get_user(id).normalize()
+        return userService.get_user(id, token).normalize()
     except AttributeError:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -90,9 +94,11 @@ async def show(id: int, userService: UserService = Depends()):
                    summary="Delete a user",
                    description="Delete a user by id",
                    dependencies=[Depends(JWTBearer())])
-async def delete(id: int, userService: UserService = Depends()):
+async def delete(id: int,
+                 userService: UserService = Depends(),
+                 token: str = Depends(JWTBearer())):
     try:
-        return userService.delete_user(id).normalize()
+        return userService.delete_user(id, token).normalize()
     except AttributeError:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -104,9 +110,11 @@ async def delete(id: int, userService: UserService = Depends()):
                 summary="Get a user's scopes",
                 description="Get a user's scopes by id (scopes are used for authorization)",
                 dependencies=[Depends(JWTBearer())])
-async def get_user_scopes(id: int, userService: UserService = Depends()):
+async def get_user_scopes(id: int,
+                          userService: UserService = Depends(),
+                          token: str = Depends(JWTBearer())):
     try:
-        scopes = userService.get_user_scopes(id)
+        scopes = userService.get_user_scopes(id, token)
         return [scope.normalize() for scope in scopes]
     except AttributeError:
         raise HTTPException(
@@ -119,9 +127,12 @@ async def get_user_scopes(id: int, userService: UserService = Depends()):
                 summary="Update a user's scopes",
                 description="Update a user's scopes by id (scopes are used for authorization)",
                 dependencies=[Depends(JWTBearer())])
-async def update_scopes(id: int, user_body: UserScopes, userService: UserService = Depends()):
+async def update_scopes(id: int,
+                        user_body: UserScopes,
+                        userService: UserService = Depends(),
+                        token: str = Depends(JWTBearer())):
     try:
-        scopes = userService.update_scopes(id, user_body)
+        scopes = userService.update_scopes(id, user_body, token)
         return [scope.normalize() for scope in scopes]
     except AttributeError:
         raise HTTPException(
@@ -134,10 +145,13 @@ async def update_scopes(id: int, user_body: UserScopes, userService: UserService
                 summary="Valide a user's email",
                 description="Valide a user's email by id and set it to verified",
                 dependencies=[Depends(JWTBearer())])
-async def update_email_verified(id: int, user_body: UserUpdateVerifiedEmail, userService: UserService = Depends()):
+async def update_email_verified(id: int,
+                                user_body: UserUpdateVerifiedEmail,
+                                userService: UserService = Depends(),
+                                token: str = Depends(JWTBearer())):
     try:
         user_body.email_verified = True
-        return userService.update_verified_email(id, user_body).normalize()
+        return userService.update_verified_email(id, user_body, token).normalize()
     except AttributeError:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

@@ -46,11 +46,11 @@ def renew_token(
             detail=f"token not found for bearer token {bearer_token.credentials}")
 
 
-@TokenRouter.post("/introspect",
-                  response_model=TokenPayload,
-                  summary="Verify a token",
-                  description="Verify a token and return the payload containing user's email and scopes if valid",
-                  dependencies=[Depends(JWTBearer())])
+@TokenRouter.get("/introspect",
+                 response_model=TokenPayload,
+                 summary="Verify a token",
+                 description="Verify a token and return the payload containing user's email and scopes if valid",
+                 dependencies=[Depends(JWTBearer())])
 def introspect_token(
         bearer_token: str = Depends(JWTBearer()),
         tokenService: TokenService = Depends(),
@@ -63,11 +63,11 @@ def introspect_token(
             detail="token not found")
 
 
-@TokenRouter.post("/revoke",
-                  response_model=TokenPublic,
-                  summary="Revoke a token",
-                  description="Revoke a token and return the deleted user",
-                  dependencies=[Depends(JWTBearer())])
+@TokenRouter.delete("/revoke",
+                    response_model=TokenPublic,
+                    summary="Revoke a token",
+                    description="Revoke a token and return the deleted user",
+                    dependencies=[Depends(JWTBearer())])
 def revoke_token(
         bearer_token: str = Depends(JWTBearer()),
         tokenService: TokenService = Depends(),

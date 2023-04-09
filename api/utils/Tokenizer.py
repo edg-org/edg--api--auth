@@ -4,6 +4,8 @@ Create a class that create and verify jwt token
 """
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
+
+from api.configs.Environment import env
 from api.repositories.TokenRepository import TokenRepository
 
 
@@ -42,3 +44,9 @@ class Tokenizer:
             return payload if "exp" in payload and datetime.fromtimestamp(payload["exp"]) >= datetime.now() else None
         except JWTError:
             return None
+
+
+bearer_tokenizer = Tokenizer(env.JWT_SECRET_BEARER, env.JWT_ALGORITHM, env.JWT_EXPIRATION_DAYS_BEARER)
+refresh_tokenizer = Tokenizer(env.JWT_SECRET_REFRESH, env.JWT_ALGORITHM, env.JWT_EXPIRATION_DAYS_REFRESH)
+forgot_password_tokenizer = Tokenizer(env.JWT_SECRET_FORGOT_PASSWORD, env.JWT_ALGORITHM,
+                                      env.JWT_EXPIRATION_DAYS_BEARER)

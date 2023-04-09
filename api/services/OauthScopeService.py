@@ -6,26 +6,48 @@ from api.models.OauthScopeModel import OauthScope
 
 from api.repositories.OauthScopeRepository import OauthScopeRepository
 from api.schemas.pydantic.OauthScopeSchema import OauthScopeCreate, OauthScopeUpdate
+from api.services.TokenService import TokenService
 
 
 class OauthScopeService:
     oauthScopeRepository: OauthScopeRepository
+    tokenService: TokenService
 
     def __init__(
-            self, oauthScopeRepository: OauthScopeRepository = Depends()
+            self,
+            oauthScopeRepository: OauthScopeRepository = Depends(),
+            tokenService: TokenService = Depends()
     ) -> None:
+        self.tokenService = tokenService
         self.oauthScopeRepository = oauthScopeRepository
 
-    def create_scope(self, oauth_scope_body: OauthScopeCreate) -> OauthScope:
+    def create_scope(self, oauth_scope_body: OauthScopeCreate, token: str) -> OauthScope:
+        if not self.tokenService.check_token(token):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=f"Inexistent token")
         return self.oauthScopeRepository.create(OauthScope(**oauth_scope_body.dict()))
 
-    def get_scope(self, id: int) -> OauthScope | None:
+    def get_scope(self, id: int, token: str) -> OauthScope | None:
+        if not self.tokenService.check_token(token):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=f"Inexistent token")
         return self.oauthScopeRepository.get(OauthScope(id=id))
 
-    def get_scopes(self, limit: int, start: int, deleted: bool = False) -> List[OauthScope]:
+    def get_scopes(self, limit: int, start: int, token: str, deleted: bool = False) -> List[OauthScope]:
+        if not self.tokenService.check_token(token):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=f"Inexistent token")
         return self.oauthScopeRepository.list(limit, start, deleted)
 
-    def update_scope(self, id: int, oauth_scope_body: OauthScopeUpdate) -> OauthScope:
+    def update_scope(self, id: int, oauth_scope_body: OauthScopeUpdate, token: str) -> OauthScope:
+        if not self.tokenService.check_token(token):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=f"Inexistent token")
+
         scope = self.oauthScopeRepository.get(OauthScope(id=id))
         if scope is None:
             raise HTTPException(
@@ -33,7 +55,12 @@ class OauthScopeService:
                 detail="scope does not exist")
         return self.oauthScopeRepository.update(id, OauthScope(**oauth_scope_body.dict()))
 
-    def delete_scope(self, id: int) -> OauthScope:
+    def delete_scope(self, id: int, token: str) -> OauthScope:
+        if not self.tokenService.check_token(token):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=f"Inexistent token")
+
         scope = self.oauthScopeRepository.get(OauthScope(id=id))
         if scope is None:
             raise HTTPException(
