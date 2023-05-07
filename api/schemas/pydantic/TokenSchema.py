@@ -33,7 +33,7 @@ class TokenPayload(BaseModel):
     """
     email: EmailStr
     exp: datetime
-    scopes: list[str]
+    roles: list[str]
 
 
 class TokenRefresh(BaseModel):

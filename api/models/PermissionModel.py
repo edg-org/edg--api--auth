@@ -2,23 +2,23 @@ from sqlalchemy import Column, String, Integer, DateTime, func
 from sqlalchemy.orm import relationship
 
 from api.models.BaseModel import EntityMeta
-from api.models.UserScopeAssociation import user_scope_association
+from api.models.RolePermissionModel import role_permission_association
 
 
-class OauthScope(EntityMeta):
+class Permission(EntityMeta):
     """
-    OauthScope is the base class for OauthScope model
+    Permission is the base class for Permission model
     """
 
-    __tablename__ = "scopes"
+    __tablename__ = "permissions"
 
     id = Column(Integer, nullable=False, unique=True, primary_key=True, autoincrement=True)
     name = Column(String(40), nullable=False, unique=True)
     description = Column(String(255), nullable=True)
-    users = relationship(
-        "User",
-        secondary=user_scope_association,
-        back_populates="scopes",
+    roles = relationship(
+        "Role",
+        secondary=role_permission_association,
+        back_populates="permissions",
     )
     updated_at: Column = Column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
     created_at: Column = Column(DateTime, nullable=False, server_default=func.now())

@@ -1,96 +1,95 @@
-from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi import APIRouter, Depends, status
 from pydantic import EmailStr
 
 from api.schemas.pydantic.TokenSchema import TokenPublic, TokenNew, TokenRefresh, TokenPayload
 from api.services.TokenService import TokenService
+from api.utils.CustomHTTPException import InexistentUserException, InvalidBearerTokenException
 from api.utils.JWTBearer import JWTBearer
 from fastapi.security import HTTPBearer
 
+from api.utils.utility import APIRouter_responses
+
 TokenRouter = APIRouter(
-    prefix="/v1/token", tags=["token"]
+    prefix="/v1/token",
+    tags=["Token"],
+    dependencies=[Depends(JWTBearer())],
+    responses=APIRouter_responses
 )
 
+PublicTokenRouter = APIRouter(
+    prefix="/v1/token",
+    tags=["Token"],
+    responses=APIRouter_responses)
 
-@TokenRouter.post("/",
-                  response_model=TokenPublic,
-                  status_code=status.HTTP_201_CREATED,
-                  summary="Create a new token",
-                  description="Create a new token for a user with email and password")
+
+@PublicTokenRouter.post("/",
+                        response_model=TokenPublic,
+                        status_code=status.HTTP_201_CREATED,
+                        summary="Create a new token",
+                        description="Create a new token for a user with email and password")
 def new_token(
         user_body: TokenNew,
-        tokenService: TokenService = Depends(),
+        token_service: TokenService = Depends(),
 ):
     try:
-        return tokenService.new_token(user_body).normalize()
+        return token_service.new_token(user_body).normalize()
     except AttributeError:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="user not found")
+        raise InexistentUserException
 
 
-@TokenRouter.post("/renew",
-                  response_model=TokenPublic,
-                  summary="Renew a token",
-                  description="Renew a token for a user with refresh token",
-                  dependencies=[Depends(HTTPBearer())])
+@PublicTokenRouter.post("/renew",
+                        response_model=TokenPublic,
+                        summary="Renew a token",
+                        description="Renew a token for a user with refresh token",
+                        dependencies=[Depends(HTTPBearer())])
 def renew_token(
         token_body: TokenRefresh,
-        tokenService: TokenService = Depends(),
+        token_service: TokenService = Depends(),
         bearer_token=Depends(HTTPBearer()),
 ):
     try:
-        return tokenService.renew_token(bearer_token.credentials, token_body).normalize()
+        return token_service.renew_token(bearer_token.credentials, token_body).normalize()
     except AttributeError:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"token not found for bearer token {bearer_token.credentials}")
+        raise InvalidBearerTokenException
 
 
 @TokenRouter.get("/introspect",
                  response_model=TokenPayload,
                  summary="Verify a token",
-                 description="Verify a token and return the payload containing user's email and scopes if valid",
-                 dependencies=[Depends(JWTBearer())])
+                 description="Verify a token and return the payload containing user's email and scopes if valid")
 def introspect_token(
         bearer_token: str = Depends(JWTBearer()),
-        tokenService: TokenService = Depends(),
+        token_service: TokenService = Depends(),
 ):
     try:
-        return tokenService.introspect_token(bearer_token)
+        return token_service.introspect_token(bearer_token)
     except AttributeError:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="token not found")
+        raise InvalidBearerTokenException
 
 
 @TokenRouter.delete("/revoke",
                     response_model=TokenPublic,
                     summary="Revoke a token",
-                    description="Revoke a token and return the deleted user",
-                    dependencies=[Depends(JWTBearer())])
+                    description="Revoke a token and return the deleted user")
 def revoke_token(
         bearer_token: str = Depends(JWTBearer()),
-        tokenService: TokenService = Depends(),
+        token_service: TokenService = Depends(),
 ):
     try:
-        return tokenService.revoke_token(bearer_token).normalize()
+        return token_service.revoke_token(bearer_token).normalize()
     except AttributeError:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="token not found")
+        raise InvalidBearerTokenException
 
 
-@TokenRouter.get("/forgot_password",
+@PublicTokenRouter.get("/forgotpassword",
                  response_model=dict,
                  summary="Create a new token for forgot password",
                  description="Create a new token for forgot password with email")
 def get_forgot_password_token(
         email: EmailStr,
-        tokenService: TokenService = Depends(),
+        token_service: TokenService = Depends(),
 ):
     try:
-        return {"token": tokenService.new_forgot_password_token(email).bearer_token}
+        return {"token": token_service.new_forgot_password_token(email).bearer_token}
     except AttributeError:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="user not found")
+        raise InexistentUserException

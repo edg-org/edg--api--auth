@@ -1,5 +1,6 @@
 from pydantic.schema import datetime
 from pydantic import BaseModel, EmailStr, constr
+from typing import List
 
 from api.schemas.pydantic.core import IDModelMixin, DateTimeModelMixin
 
@@ -35,11 +36,11 @@ class UserUpdatePassword(BaseModel):
     token: str
 
 
-class UserScopes(BaseModel):
+class UserRoles(BaseModel):
     """
     Users can change their password
     """
-    scopes: list[int]
+    roles: List[int]
 
 
 class UserInDB(IDModelMixin, DateTimeModelMixin, UserBase):
@@ -52,3 +53,11 @@ class UserInDB(IDModelMixin, DateTimeModelMixin, UserBase):
 
 class UserPublic(IDModelMixin, DateTimeModelMixin, UserBase):
     pass
+
+
+class UsersPublic(BaseModel):
+    count: int
+    total: int
+    page_size: int
+    start_index: int
+    results: List[UserPublic] = []

@@ -25,7 +25,7 @@ class RepositoryMeta(Generic[M, K]):
 
     # Lists all existing instance of the Model
     @abstractmethod
-    def list(self, limit: int, start: int) -> List[M]:
+    def list(self, limit: int, start: int) -> (int, List[M]):
         pass
 
     # Updates an existing instance of the Model

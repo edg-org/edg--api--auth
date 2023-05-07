@@ -1,26 +1,30 @@
-from sqlalchemy import Column, String, Boolean, DateTime, func, Integer
+from sqlalchemy import Column, String, Integer, DateTime, func
 from sqlalchemy.orm import relationship
 
 from api.models.BaseModel import EntityMeta
+from api.models.RolePermissionModel import role_permission_association
 from api.models.UserRoleAssociation import user_role_association
 
 
-class User(EntityMeta):
+class Role(EntityMeta):
     """
-    User is the base class for User model
+    Role is the base class for Role model
     """
 
-    __tablename__ = "users"
+    __tablename__ = "roles"
 
     id = Column(Integer, nullable=False, unique=True, primary_key=True, autoincrement=True)
-    email = Column(String(40), nullable=False, unique=True)
-    email_verified = Column(Boolean, nullable=False, default=False)
-    password = Column(String(256), nullable=False)
-    salt = Column(String(100), nullable=False)
-    roles = relationship(
-        "Role",
+    name = Column(String(40), nullable=False, unique=True)
+    description = Column(String(255), nullable=True)
+    users = relationship(
+        "User",
         secondary=user_role_association,
-        back_populates="users",
+        back_populates="roles",
+    )
+    permissions = relationship(
+        "Permission",
+        secondary=role_permission_association,
+        back_populates="roles",
     )
     updated_at: Column = Column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
     created_at: Column = Column(DateTime, nullable=False, server_default=func.now())
@@ -29,10 +33,8 @@ class User(EntityMeta):
     def normalize(self):
         return {
             "id": self.id,
-            "email": self.email,
-            "email_verified": self.email_verified,
-            "password": self.password,
-            "salt": self.salt,
+            "name": self.name,
+            "description": self.description,
             "updated_at": self.updated_at,
             "created_at": self.created_at,
             "deleted_at": self.deleted_at,
