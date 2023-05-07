@@ -21,6 +21,6 @@ LABEL org.opencontainers.image.source=https://github.com/${GH_USER}/${GH_REPO}
 RUN apt-get update && apt-get install -y default-libmysqlclient-dev \
  && rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /usr/local/lib/python3.9/site-packages /usr/local/lib/python3.9/site-packages
+COPY --from=builder /usr/local/lib/python3.10/site-packages /usr/local/lib/python3.10/site-packages
 
 COPY api /app/api
