@@ -9,6 +9,7 @@ load_dotenv()
 
 class EnvironmentSettings(BaseSettings):
     API_VERSION: str = os.getenv("API_VERSION")
+    API_PREFIX: str = os.getenv("API_PREFIX")
     APP_NAME: str = os.getenv("APP_NAME")
     DATABASE_DIALECT: str = os.getenv("DATABASE_DIALECT")
     DATABASE_HOSTNAME: str = os.getenv("DATABASE_HOSTNAME")
