@@ -47,7 +47,7 @@ class UserService:
         return user
 
     def create_user(self, user_body: UserCreate) -> User:
-        user = self.check_user_exists_by_email(user_body.email)
+        user = self.get_user_by_email(user_body.email)
         if user is not None:
             raise AlreadyExistsUserException
         user_body.password, salt = Hasher.hash_password(user_body.password)
